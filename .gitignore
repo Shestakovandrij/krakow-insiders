@@ -1,0 +1,9 @@
+# OS
+.DS_Store
+
+# Design reference only — the full Tourvia Webflow export + stock footage.
+# Not part of the deployed site (nothing in the site links to assets/).
+assets/
+
+# Node
+node_modules/
