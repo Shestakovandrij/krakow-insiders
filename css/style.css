@@ -424,6 +424,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 .navbar.is-scrolled .nav-brand__logo--light { opacity: 0; }
 .navbar.is-scrolled .nav-brand__logo--dark { opacity: 1; }
 
+/* Burger menu open: the white overlay sits under the header, so switch the
+   lockup to the dark variant (white KRAKOW / tagline recoloured to graphite)
+   so it stays readable over the light menu */
+body.menu-open .navbar .nav-brand__logo--light { opacity: 0; }
+body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
+
 .navbar.is-scrolled .nav-brand { color: var(--text-01); }
 
 /* Template pattern: links live inside a translucent bordered pill */
@@ -2432,7 +2438,7 @@ body.modal-open { overflow: hidden; }
   right: 0;
   bottom: 0;
   z-index: 80;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  padding: 9px 16px calc(9px + env(safe-area-inset-bottom));
   /* Frosted glass: translucent surface + heavy blur so the content scrolls
      through it, with a top highlight edge for the liquid-glass feel */
   background: rgba(248, 248, 248, 0.55);
@@ -2593,7 +2599,7 @@ body.modal-open { overflow: hidden; }
 }
 
 @media (max-width: 767px) {
-  body { padding-bottom: 84px; }
+  body { padding-bottom: 68px; }
 
   .page-vertical-padding { padding-inline: 16px; }
   .nav-container { padding-inline: 16px; }
@@ -2609,11 +2615,11 @@ body.modal-open { overflow: hidden; }
     align-items: stretch;
     gap: 12px;
   }
-  .mobile-cta .button-block { flex: 1 1 auto; min-height: 56px; justify-content: center; }
+  .mobile-cta .button-block { flex: 1 1 auto; min-height: 50px; justify-content: center; }
   .mobile-cta__call {
     flex: 0 0 auto;
-    width: 56px;
-    min-height: 56px;
+    width: 50px;
+    min-height: 50px;
     display: grid;
     place-items: center;
     border-radius: 16px;
@@ -2643,13 +2649,21 @@ body.modal-open { overflow: hidden; }
       rgba(0, 0, 0, 0.44) 54%,
       rgba(0, 0, 0, 0.86) 86%);
   }
-  .hero-title-block { inset: 4.5vh 0 auto; }
-  .hero-giant-title {
-    white-space: normal;
-    text-align: center;
-    font-size: clamp(2rem, 8.5vw, 2.75rem);
-    color: rgba(255, 255, 255, 0.32);
+  /* Drop the faded background wordmark on phones — it competed with the K
+     lockup in the hero image and cluttered the top of the screen */
+  .hero-title-block { display: none; }
+
+  /* Anchor the hero copy near the top instead of the bottom, ~50px below the
+     fixed header, so it fills the space the wordmark used to occupy */
+  .hero-content-wrapper { justify-content: flex-start; overflow: visible; }
+  .hero-content-block {
+    padding-top: calc(var(--header-h) + 50px);
+    padding-bottom: 2.5rem;
+    align-items: stretch;
   }
+  /* In the column flex the copy block must fill the width so the heading wraps
+     inside the viewport instead of overflowing to the right */
+  .hero-content-left-block { width: 100%; max-width: 100%; }
   .hero-subtitle { color: var(--white); }
   .hero-cta-block { width: 100%; grid-auto-flow: row; }
 
