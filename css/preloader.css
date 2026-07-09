@@ -1,0 +1,116 @@
+/* ============================================================
+   Krakow Insiders — Preloader ("Insider Journey Begins")
+   Scoped under #ki-preloader so it can't touch the site.
+   Fonts: Cinzel (brand serif, from style.css @font-face) + Inter.
+   ============================================================ */
+#ki-preloader{
+  --navy:#1F1710;
+  --navy-dark:#150F0A;
+  --gold:#D19A2A;
+  --gold-soft:#E8C56A;
+  --beige:#F3E6CE;
+  --white:#FFFFFF;
+  --muted:rgba(255,255,255,0.68);
+  --glass:rgba(255,255,255,0.08);
+  --glass-border:rgba(255,255,255,0.16);
+  --ki-serif:"Cinzel",Georgia,"Times New Roman",serif;
+  --ki-sans:"Inter","Inter Tight",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  color:var(--white);
+  font-family:var(--ki-sans);
+  clip-path:inset(0% 0% 0% 0%);
+  will-change:clip-path;
+}
+#ki-preloader *{box-sizing:border-box}
+
+/* background layers */
+#ki-preloader .pl-bg{position:absolute;inset:0;background:
+  radial-gradient(120% 100% at 50% 40%, #2E2216 0%, var(--navy) 42%, var(--navy-dark) 100%);}
+#ki-preloader .pl-glow{
+  position:absolute;left:50%;top:46%;
+  width:min(80vw,720px);height:min(80vw,720px);
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle at center,
+     rgba(232,197,106,0.20) 0%, rgba(209,154,42,0.10) 32%, rgba(209,154,42,0) 62%);
+  filter:blur(6px);pointer-events:none;
+}
+#ki-preloader .pl-grain{
+  position:absolute;inset:-50%;opacity:0.05;mix-blend-mode:overlay;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:kiGrain 8s steps(6) infinite;
+}
+@keyframes kiGrain{0%{transform:translate(0,0)}100%{transform:translate(6%,4%)}}
+#ki-preloader .pl-vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,0) 55%, rgba(8,5,3,0.6) 100%);}
+
+/* content */
+#ki-preloader .pl-content{position:relative;z-index:2;display:flex;flex-direction:column;
+  align-items:center;width:100%;max-width:640px;padding:0 24px;text-align:center}
+#ki-preloader .pl-label{font-size:11px;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--gold-soft);font-weight:500;margin-bottom:18px;width:100%}
+#ki-preloader .pl-route{position:relative;width:min(320px,64vw);height:2px;margin-bottom:44px}
+#ki-preloader .pl-route-line{position:absolute;inset:0;transform-origin:left center;transform:scaleX(0);
+  background:linear-gradient(90deg,transparent 0%,var(--gold) 30%,var(--beige) 55%,var(--gold) 72%,transparent 100%)}
+#ki-preloader .pl-route-dot{position:absolute;top:50%;left:0;width:7px;height:7px;border-radius:50%;
+  transform:translate(-50%,-50%);opacity:0;background:var(--beige);box-shadow:0 0 10px 2px rgba(232,197,106,0.8)}
+
+#ki-preloader .pl-stage{position:relative;width:min(560px,92vw);display:flex;
+  align-items:center;justify-content:center;min-height:230px;margin-bottom:8px}
+#ki-preloader .pl-logo-frame{position:relative;width:230px;max-width:52vw;overflow:hidden}
+#ki-preloader .pl-logo{display:block;width:100%;height:auto;clip-path:inset(0% 50% 0% 50%)}
+#ki-preloader .pl-sweep{position:absolute;top:0;bottom:0;left:0;width:60%;
+  transform:translateX(-140%) skewX(-14deg);opacity:0;mix-blend-mode:screen;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0) 20%,
+     rgba(255,255,255,0.45) 50%,rgba(255,255,255,0) 80%,transparent 100%)}
+
+#ki-preloader .pl-card{position:absolute;display:flex;align-items:center;gap:10px;
+  padding:11px 15px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.08),0 12px 30px rgba(0,0,0,0.28)}
+#ki-preloader .pl-card-dot{width:6px;height:6px;border-radius:50%;flex:none;
+  background:var(--gold-soft);box-shadow:0 0 8px 1px rgba(232,197,106,0.7)}
+#ki-preloader .pl-card-text{display:flex;flex-direction:column;line-height:1.2;text-align:left}
+#ki-preloader .pl-card-kicker{font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+#ki-preloader .pl-card-title{font-size:13px;letter-spacing:.02em;color:var(--white);font-weight:500}
+#ki-preloader .pl-card--tl{top:2px;left:0}
+#ki-preloader .pl-card--tr{top:2px;right:0}
+#ki-preloader .pl-card--bl{bottom:2px;left:0}
+#ki-preloader .pl-card--br{bottom:2px;right:0}
+
+#ki-preloader .pl-message{font-family:var(--ki-serif);font-weight:500;
+  font-size:clamp(24px,4.6vw,40px);letter-spacing:.02em;line-height:1.14;margin-top:26px;width:100%}
+#ki-preloader .pl-status{margin-top:14px;min-height:16px;width:100%;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+
+#ki-preloader .pl-progress{position:absolute;left:50%;bottom:clamp(28px,7vh,64px);
+  transform:translateX(-50%);width:min(300px,72vw);display:flex;flex-direction:column;
+  align-items:center;gap:12px}
+#ki-preloader .pl-counter{font-family:var(--ki-serif);font-weight:400;color:var(--beige);
+  display:flex;align-items:baseline;gap:3px;line-height:1}
+#ki-preloader .pl-num{font-size:clamp(38px,8vw,58px)}
+#ki-preloader .pl-pct{font-size:clamp(14px,3vw,20px);color:var(--muted);font-weight:400}
+#ki-preloader .pl-track{width:100%;height:1px;background:rgba(255,255,255,0.14);border-radius:2px;overflow:hidden}
+#ki-preloader .pl-fill{height:100%;width:0%;border-radius:2px;
+  background:linear-gradient(90deg,var(--gold),var(--beige));box-shadow:0 0 10px rgba(232,197,106,0.5)}
+
+#ki-preloader .pl-final{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-family:var(--ki-serif);font-weight:500;font-size:clamp(22px,4.2vw,36px);
+  letter-spacing:.02em;color:var(--white);opacity:0;width:100%;text-align:center;padding:0 24px}
+
+@media (max-width:720px){
+  #ki-preloader .pl-card{display:none}
+  #ki-preloader .pl-stage{min-height:0;margin-bottom:2px}
+  #ki-preloader .pl-route{margin-bottom:34px}
+  #ki-preloader .pl-label{font-size:9px;letter-spacing:.2em}
+  #ki-preloader .pl-message{font-size:clamp(21px,6vw,30px);margin-top:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  #ki-preloader .pl-grain{animation:none}
+}

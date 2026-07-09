@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/preloader.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a77ed'/%3E%3Ctext x='16' y='22' font-family='Arial,sans-serif' font-weight='700' font-size='15' fill='%23ffffff' text-anchor='middle'%3EKI%3C/text%3E%3C/svg%3E">
   <script type="application/ld+json">
   {
@@ -28,6 +29,57 @@
   </script>
 </head>
 <body>
+
+  <!-- ============ PRELOADER ("Insider Journey Begins") ============ -->
+  <div id="ki-preloader" role="status" aria-live="polite" aria-label="Loading Krakow Insiders">
+    <div class="pl-bg"></div>
+    <div class="pl-glow"></div>
+    <div class="pl-grain"></div>
+    <div class="pl-vignette"></div>
+
+    <div class="pl-content">
+      <div class="pl-label">Krakow Insiders · Private Journey</div>
+
+      <div class="pl-route">
+        <span class="pl-route-line"></span>
+        <span class="pl-route-dot"></span>
+      </div>
+
+      <div class="pl-stage">
+        <div class="pl-logo-frame">
+          <img class="pl-logo" src="images/logo-full.png" alt="Krakow Insiders — Private Transfers & Local Experts" width="1092" height="948" decoding="async" fetchpriority="high">
+          <div class="pl-sweep"></div>
+        </div>
+
+        <div class="pl-card pl-card--tl">
+          <span class="pl-card-dot"></span>
+          <span class="pl-card-text"><span class="pl-card-kicker">Insider</span><span class="pl-card-title">Private Tours</span></span>
+        </div>
+        <div class="pl-card pl-card--tr">
+          <span class="pl-card-dot"></span>
+          <span class="pl-card-text"><span class="pl-card-kicker">Comfort</span><span class="pl-card-title">Airport Transfers</span></span>
+        </div>
+        <div class="pl-card pl-card--bl">
+          <span class="pl-card-dot"></span>
+          <span class="pl-card-text"><span class="pl-card-kicker">Trusted</span><span class="pl-card-title">Local Experts</span></span>
+        </div>
+        <div class="pl-card pl-card--br">
+          <span class="pl-card-dot"></span>
+          <span class="pl-card-text"><span class="pl-card-kicker">Heritage</span><span class="pl-card-title">Kraków Experiences</span></span>
+        </div>
+      </div>
+
+      <div class="pl-message">Your Insider Journey Begins</div>
+      <div class="pl-status">Planning your route</div>
+    </div>
+
+    <div class="pl-progress">
+      <div class="pl-counter"><span class="pl-num">0</span><span class="pl-pct">%</span></div>
+      <div class="pl-track"><span class="pl-fill"></span></div>
+    </div>
+
+    <div class="pl-final">Ready. Welcome, Insider.</div>
+  </div>
 
   <!-- ============ HEADER / NAVIGATION ============ -->
   <header class="navbar" id="header">
@@ -1387,6 +1439,7 @@
   </div>
 
   <script src="js/vendor/gsap.min.js"></script>
+  <script src="js/preloader.js"></script>
   <script src="js/vendor/ScrollTrigger.min.js"></script>
   <script src="js/vendor/SplitText.min.js"></script>
   <script src="js/translations.js"></script>
