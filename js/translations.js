@@ -48,6 +48,7 @@ window.KI_TRANSLATIONS = {
     "tours.intro": "Odkryj najczęściej wybierane doświadczenia z Krakowa — od historycznych miejsc po górskie przygody i wyjątkowe lokalne atrakcje.",
     "tours.lead": "Odkryj najczęściej wybierane doświadczenia z Krakowa — od historycznych miejsc po górskie przygody i wyjątkowe lokalne atrakcje",
     "tours.tagCustom": "Na zamówienie",
+    "tours.priceUnit": "/ os.",
 
     "tours.t1.title": "Wycieczka do Auschwitz-Birkenau",
     "tours.t1.tag": "6–7 godzin",

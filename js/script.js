@@ -239,6 +239,58 @@
     if (video && !video.paused) video.pause();
   }
 
+  /* ========================================================================
+     WhatsApp deep links — tour cards and the contact form send a pre-filled
+     message to the business number so guests skip straight to a chat.
+     ======================================================================== */
+
+  var WA_NUMBER = "48883917920";
+  var WA_MESSAGES = {
+    en: 'Hello! I would like to book the "{name}" experience. Could you please share availability and details?',
+    pl: 'Dzień dobry! Chciał(a)bym zarezerwować „{name}". Proszę o informację o dostępności i szczegółach.'
+  };
+
+  function buildWaLink(name) {
+    var template = WA_MESSAGES[currentLang] || WA_MESSAGES.en;
+    var message = template.replace("{name}", name);
+    return "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(message);
+  }
+
+  function initWhatsapp() {
+    var tourLinks = Array.prototype.slice.call(document.querySelectorAll("[data-whatsapp]"));
+
+    function refreshTourLinks() {
+      tourLinks.forEach(function (link) {
+        var card = link.closest(".destination-card");
+        var titleEl = card ? card.querySelector(".destination-name") : null;
+        /* Prefer the visible (already-translated) tour title, fall back to the key */
+        var name = (titleEl ? titleEl.textContent.trim() : "") || link.getAttribute("data-type") || "";
+        link.setAttribute("href", buildWaLink(name));
+      });
+    }
+
+    refreshTourLinks();
+    document.addEventListener("ki:langchange", refreshTourLinks);
+
+    /* The lead-form WhatsApp button folds in whatever the guest has typed */
+    document.querySelectorAll("[data-whatsapp-form]").forEach(function (link) {
+      link.addEventListener("click", function () {
+        var form = link.closest("form");
+        var typeField = form ? form.querySelector("[name='type']") : null;
+        var nameField = form ? form.querySelector("[name='name']") : null;
+        var type = typeField && typeField.value ? typeField.value : "";
+        var name = nameField && nameField.value ? nameField.value.trim() : "";
+
+        var message = "Hello! I'd like to book with Krakow Insiders.";
+        if (type) message += ' Experience: "' + type + '".';
+        if (name) message += " My name is " + name + ".";
+        message += " Could you please share availability and details?";
+
+        link.setAttribute("href", "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(message));
+      });
+    });
+  }
+
   function initModals() {
     var bookingModal = document.getElementById("bookingModal");
     var videoModal = document.getElementById("videoModal");
@@ -297,44 +349,27 @@
     var closeBtn = document.getElementById("introWidgetClose");
     var bubble = document.getElementById("introWidgetBubble");
 
-    var savedState = null;
-    try {
-      savedState = sessionStorage.getItem(WIDGET_STORAGE_KEY);
-    } catch (e) {
-      savedState = null;
-    }
-    if (savedState === "closed") widget.classList.add("is-closed");
-    if (savedState === "minimized") widget.classList.add("is-minimized");
-
-    function persist(state) {
-      try {
-        sessionStorage.setItem(WIDGET_STORAGE_KEY, state);
-      } catch (e) {
-        /* session storage unavailable — state is kept for the current view only */
-      }
-    }
+    /* The widget state is intentionally NOT persisted: it should reappear on
+       every page load, and the close/minimize controls only apply to the
+       current view. */
 
     if (minBtn) {
       minBtn.addEventListener("click", function () {
         widget.classList.add("is-minimized");
-        persist("minimized");
       });
     }
 
     if (bubble) {
       bubble.addEventListener("click", function () {
         widget.classList.remove("is-minimized");
-        persist("open");
       });
     }
 
     if (closeBtn) {
       closeBtn.addEventListener("click", function () {
         widget.classList.add("is-closed");
-        persist("closed");
       });
     }
-
   }
 
   /* Floating elements (intro widget + booking button) stay hidden on the
@@ -989,6 +1024,7 @@
     initHeader();
     initMobileMenu();
     initModals();
+    initWhatsapp();
     initIntroWidget();
     initFloatingVisibility();
     initFaq();

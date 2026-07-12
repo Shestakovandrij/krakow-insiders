@@ -921,7 +921,16 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
   z-index: 1;
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(#0000 58%, #000000e6 82%), linear-gradient(0deg, #0000 61%, #000000e6);
+  /* Stronger, taller scrim: the text block sits mid-card, so darken the whole
+     lower half for reliable contrast on busy/bright images */
+  background-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.94) 0%,
+    rgba(0, 0, 0, 0.88) 26%,
+    rgba(0, 0, 0, 0.6) 48%,
+    rgba(0, 0, 0, 0.22) 68%,
+    rgba(0, 0, 0, 0) 86%
+  );
 }
 
 .destination-card-image {
@@ -973,6 +982,28 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
   color: var(--text-03);
   font-size: var(--p2-size);
   max-width: 40ch;
+}
+
+.destination-card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.destination-card-price__amount {
+  font-family: var(--font-secondary);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: -0.01em;
+}
+
+.destination-card-price__unit {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .destination-card .button-primary { margin-top: 4px; width: 100%; }
@@ -1988,6 +2019,32 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
   pointer-events: none;
 }
 
+/* WhatsApp booking button inside the lead form — matched to the submit
+   button's height (46px icon circle + 6px top/bottom padding = 58px) */
+.lead-form__whatsapp {
+  margin-top: 10px;
+  gap: 10px;
+  padding: 6px 20px;
+  min-height: 60px;
+  justify-content: center;
+  background: #25d366;
+  border-color: #25d366;
+  color: #06341c;
+}
+
+.lead-form__whatsapp:hover {
+  background: #1ebe5d;
+  border-color: #1ebe5d;
+  color: #06341c;
+}
+
+.lead-form__whatsapp .lead-form__whatsapp-icon {
+  display: inline-flex;
+  color: #06341c;
+}
+
+.lead-form__whatsapp .button-text { color: inherit; }
+
 /* ---------- Footer (Tourvia bg-image footer) ---------- */
 .footer {
   background-image: linear-gradient(#efe7df, #2a2018cc 26%, #070707 62%), url("../images/footer-bg-krakow.png");
@@ -2335,6 +2392,14 @@ body.modal-open { overflow: hidden; }
   background: var(--white);
   display: grid;
   place-items: center;
+  box-shadow: 0 6px 16px -6px rgba(7, 30, 60, 0.4);
+}
+
+/* Optical centering: a triangle looks off-centre when mathematically centred */
+.intro-widget__play img {
+  width: 14px;
+  height: 16px;
+  margin-left: 3px;
 }
 
 .intro-widget__title {
@@ -2594,12 +2659,31 @@ body.modal-open { overflow: hidden; }
 
   .contacts__grid { grid-template-columns: 1fr; }
 
-  .intro-widget { display: none; }
+  /* Compact video widget stays in the bottom-right corner on tablet/mobile */
+  .intro-widget {
+    display: block;
+    right: 12px;
+    bottom: 1.25rem;
+  }
+  .intro-widget__card {
+    width: 150px;
+    padding: 6px;
+    gap: 6px;
+  }
+  .intro-widget__title,
+  .intro-widget__card > .button-secondary { display: none; }
+  .intro-widget__play { width: 38px; height: 38px; }
+  .intro-widget__minimize, .intro-widget__close { width: 26px; height: 26px; }
+
   .float-booking { display: none; }
 }
 
 @media (max-width: 767px) {
   body { padding-bottom: 68px; }
+
+  /* Lift the video widget above the sticky bottom CTA bar */
+  .intro-widget { bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .intro-widget.is-minimized .intro-widget__bubble { bottom: 0; }
 
   .page-vertical-padding { padding-inline: 16px; }
   .nav-container { padding-inline: 16px; }
