@@ -993,6 +993,11 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
   border-top: 1px solid rgba(255, 255, 255, 0.22);
 }
 
+.destination-card-price__from {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .destination-card-price__amount {
   font-family: var(--font-secondary);
   font-size: 1.375rem;
@@ -1148,6 +1153,13 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
   line-height: 1.55;
 }
 
+.transfer-item__price-amount {
+  font-family: var(--font-secondary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 .transfer-item__link {
   margin-top: auto;
   padding-top: 8px;
@@ -1236,6 +1248,27 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
 }
 
 .package-card-description { color: var(--text-02); font-size: 0.9375rem; }
+
+.package-card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-01, rgba(0, 0, 0, 0.1));
+}
+
+.package-card-price__amount {
+  font-family: var(--font-secondary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.package-card-price__unit {
+  font-size: 0.8125rem;
+  color: var(--text-02);
+}
 
 .package-card-cta-block {
   display: flex;
