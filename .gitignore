@@ -7,3 +7,5 @@ assets/
 
 # Node
 node_modules/
+.vercel
+.env*

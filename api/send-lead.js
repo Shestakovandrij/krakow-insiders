@@ -18,10 +18,21 @@
            password: smtp.gmail.com, port 465)
    ========================================================================== */
 
-const nodemailer = require("nodemailer");
+/* nodemailer is optional: the email channel is a bonus, Telegram is the
+   critical one. Requiring it at the top would crash the whole function on
+   load when the package is not installed, taking Telegram down with it. */
+let nodemailer = null;
+try {
+  nodemailer = require("nodemailer");
+} catch (e) {
+  nodemailer = null;
+}
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "PASTE_TELEGRAM_BOT_TOKEN_HERE";
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "PASTE_TELEGRAM_CHAT_ID_HERE";
+/* Credentials live in the hosting environment variables, never in this file:
+   the repository is public. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in
+   Vercel > Settings > Environment Variables. */
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 const RECIPIENT_EMAIL = process.env.RECIPIENT_EMAIL || "Krakowinsider.tour@gmail.com";
 
 const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
@@ -87,7 +98,69 @@ function formatLeadText(lead) {
   ].join("\n");
 }
 
-async function sendToTelegram(text) {
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/* Telegram uses parse_mode: HTML. Only <b>, <i>, <code>, <a> are allowed there,
+   so every dynamic value goes through escapeHtml() first. */
+function formatTelegramHtml(lead) {
+  const isTransfer = /transfer/i.test(lead.type);
+  const headline = isTransfer ? "🚗 New transfer request" : "🧭 New tour request";
+
+  const lines = [
+    "<b>" + headline + "</b>",
+    "━━━━━━━━━━━━━━━",
+    "",
+    "👤 <b>Name:</b> " + escapeHtml(lead.name),
+    "📱 <b>Phone / WhatsApp:</b> " + escapeHtml(lead.phone),
+    "✉️ <b>Email:</b> " + escapeHtml(lead.email),
+    "",
+    "📍 <b>Type:</b> " + escapeHtml(lead.type),
+    "📅 <b>Date:</b> " + escapeHtml(lead.date),
+    "👥 <b>People:</b> " + escapeHtml(lead.people)
+  ];
+
+  if (lead.message) {
+    lines.push("", "💬 <b>Message:</b>", escapeHtml(lead.message));
+  }
+
+  lines.push(
+    "",
+    "━━━━━━━━━━━━━━━",
+    "🔖 <b>Section:</b> " + escapeHtml(lead.section || "—"),
+    "🌐 <b>Language:</b> " + escapeHtml((lead.lang || "—").toUpperCase()),
+    "🕒 <b>Received:</b> " + escapeHtml(formatWarsawTime(lead.submittedAt))
+  );
+
+  if (lead.page) {
+    lines.push('🔗 <a href="' + escapeHtml(lead.page) + '">Page the lead came from</a>');
+  }
+
+  return lines.join("\n");
+}
+
+function formatWarsawTime(isoString) {
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return isoString;
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Warsaw",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(date) + " (Krakow time)";
+  } catch (e) {
+    return date.toISOString();
+  }
+}
+
+async function sendToTelegram(lead) {
   if (!isConfigured(TELEGRAM_BOT_TOKEN) || !isConfigured(TELEGRAM_CHAT_ID)) {
     return { channel: "telegram", ok: false, skipped: true, reason: "not configured" };
   }
@@ -98,7 +171,8 @@ async function sendToTelegram(text) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       chat_id: TELEGRAM_CHAT_ID,
-      text: text,
+      text: formatTelegramHtml(lead),
+      parse_mode: "HTML",
       disable_web_page_preview: true
     })
   });
@@ -114,6 +188,9 @@ async function sendToTelegram(text) {
 }
 
 async function sendEmail(lead, text) {
+  if (!nodemailer) {
+    return { channel: "email", ok: false, skipped: true, reason: "nodemailer not installed" };
+  }
   if (!isConfigured(SMTP_USER) || !isConfigured(SMTP_PASS)) {
     return { channel: "email", ok: false, skipped: true, reason: "not configured" };
   }
@@ -169,7 +246,7 @@ module.exports = async function handler(req, res) {
 
   const text = formatLeadText(lead);
 
-  const results = await Promise.allSettled([sendToTelegram(text), sendEmail(lead, text)]);
+  const results = await Promise.allSettled([sendToTelegram(lead), sendEmail(lead, text)]);
 
   const outcomes = results.map(function (result) {
     if (result.status === "fulfilled") return result.value;
