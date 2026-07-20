@@ -76,7 +76,7 @@ window.KI_TRANSLATIONS = {
 
     /* ---------- Private Transfers ---------- */
     "transfers.title": "Transfery prywatne",
-    "transfers.intro": "Komfortowe prywatne transfery z Krakowa na lotniska, do innych miast i pod wskazane adresy. Wyślij nam swoją trasę, a zaproponujemy najlepszą opcję dopasowaną do Twojego planu.",
+    "transfers.intro": "Komfortowe prywatne transfery door-to-door z lotniska w Krakowie do centrum miasta, hoteli lub pod dowolny wskazany adres. Nasi zawodowi kierowcy odbiorą Cię z tabliczką z imieniem w strefie przylotów, pomogą z bagażem i zapewnią szybki, bezpieczny przejazd nowoczesnym samochodem w stałej cenie. Wyślij nam swoją trasę, a dobierzemy najlepszą opcję dopasowaną do Twojego planu!",
     "transfers.tag": "Od drzwi do drzwi",
     "transfers.tagIntercity": "Międzymiastowy",
     "transfers.tagCustom": "Dowolna trasa",
