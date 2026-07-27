@@ -942,6 +942,9 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
   transition: transform 0.8s var(--ease-premium);
 }
 
+/* Keeps a busy right-hand subject out of the text area on portrait crops */
+.destination-card-image--focus-left { object-position: 32% center; }
+
 .destination-card:hover .destination-card-image { transform: scale(1.06); }
 
 .destination-card-description {
@@ -1014,14 +1017,20 @@ body.menu-open .navbar .nav-brand__logo--dark { opacity: 1; }
 .destination-card .button-primary { margin-top: 4px; width: 100%; }
 
 .destination-card--custom {
+  /* Closes the last grid row: the tour cards divide evenly, this one spans the
+     remainder so the block never ends on an empty cell */
+  grid-column: 1 / -1;
+  height: 300px;
   background: var(--brand) url("../images/custom-tour-skyline.png") center bottom / cover no-repeat;
 }
 .destination-card--custom .destination-card-description {
   position: relative;
   height: 100%;
+  max-width: 520px;
   justify-content: flex-start;
   gap: 16px;
 }
+.destination-card--custom .button-primary { width: auto; }
 .destination-card--custom .designation-card-bottom-block { flex: 1 1 auto; }
 .destination-card--custom .designation-card-bottom-block .button-primary { margin-top: auto; }
 .destination-card--custom .destination-card-country-block { background: var(--bg-03); }

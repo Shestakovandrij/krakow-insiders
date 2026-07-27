@@ -49,6 +49,7 @@ window.KI_TRANSLATIONS = {
     "tours.lead": "Odkryj najczęściej wybierane doświadczenia z Krakowa — od historycznych miejsc po górskie przygody i wyjątkowe lokalne atrakcje",
     "tours.tagCustom": "Na zamówienie",
     "tours.priceUnit": "/ os.",
+    "tours.priceUnitDay": "/ os., cały dzień",
     "tours.priceFrom": "od",
 
     "tours.t1.title": "Wycieczka do Auschwitz-Birkenau",
@@ -70,6 +71,10 @@ window.KI_TRANSLATIONS = {
     "tours.t5.title": "Muzeum — Fabryka Oskara Schindlera",
     "tours.t5.tag": "2–2,5 godziny",
     "tours.t5.desc": "Odwiedź jedno z najbardziej poruszających muzeów Krakowa i poznaj wojenną historię miasta poprzez przejmującą wystawę.",
+
+    "tours.t6.title": "Park rozrywki Energylandia",
+    "tours.t6.tag": "Cały dzień",
+    "tours.t6.desc": "Największy park rozrywki w Polsce w Zatorze, z prywatnym transferem door-to-door spod hotelu w Krakowie i komfortowym powrotem po pełnym wrażeń dniu.",
 
     "tours.custom.title": "Wycieczki szyte na miarę",
     "tours.custom.desc": "Masz inny pomysł na zwiedzanie? Napisz do nas na WhatsApp, a przygotujemy indywidualny plan wycieczki specjalnie dla Ciebie.",
