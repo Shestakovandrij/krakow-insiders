@@ -2,14 +2,20 @@
    Krakow Insiders — storage layer
 
    The panel keeps content in JSON, not in a database. Where that JSON lives
-   depends on the environment:
+   depends on what the environment offers, checked in this order:
 
-     - Deployed, with a GitHub token: on the repository's `panel-data`
-       branch. Every save is a commit, so the history of the site's content
-       is the history of that branch and a bad edit is one revert away.
+     - GITHUB_TOKEN — on the repository's `panel-data` branch. Every save is
+       a commit, so the history of the site's content is a branch history
+       and a bad edit is one revert away.
 
-     - Locally, with no token: in .local-store/ on disk. Same shape, same
-       calls, so the whole panel can be exercised before deploying.
+     - BLOB_READ_WRITE_TOKEN — in Vercel Blob. No version history, but the
+       store is created by clicking "Connect Project" and needs no token
+       issued by hand, which is the whole reason to prefer it.
+
+     - Neither — in .local-store/ on disk. That is the local-development
+       case; on Vercel the filesystem is read-only, so a deployment with no
+       token cannot save at all, and the panel says so rather than failing
+       silently.
 
    Nothing above this file knows which one is active.
    ========================================================================== */
@@ -25,6 +31,9 @@ const github = require("./github");
 const SEED_CONTENT = require("../../data/content.json");
 
 const USE_GITHUB = github.isConfigured();
+const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || "";
+const USE_BLOB = !USE_GITHUB && BLOB_TOKEN.length > 0;
+
 const LOCAL_DIR = path.join(process.cwd(), ".local-store");
 
 const CONTENT_KEY = "content.json";
@@ -45,6 +54,16 @@ async function readJson(key) {
     return text ? JSON.parse(text) : null;
   }
 
+  if (USE_BLOB) {
+    const { get } = require("@vercel/blob");
+    /* useCache: false — the panel must read back exactly what it just
+       wrote, and a CDN-cached copy would show the previous version. */
+    const result = await get(key, { access: "private", useCache: false, token: BLOB_TOKEN });
+    if (!result || !result.stream) return null;
+    const text = await new Response(result.stream).text();
+    return text ? JSON.parse(text) : null;
+  }
+
   try {
     const text = await fs.readFile(path.join(LOCAL_DIR, key), "utf8");
     return text ? JSON.parse(text) : null;
@@ -59,6 +78,19 @@ async function writeJson(key, value, message) {
 
   if (USE_GITHUB) {
     await github.writeText(key, text, message || ("Update " + key));
+    return;
+  }
+
+  if (USE_BLOB) {
+    const { put } = require("@vercel/blob");
+    await put(key, text, {
+      access: "private",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: 0,
+      token: BLOB_TOKEN
+    });
     return;
   }
 
@@ -130,6 +162,18 @@ async function writeMedia(name, buffer, message) {
     return "/m/" + name;
   }
 
+  if (USE_BLOB) {
+    const { put } = require("@vercel/blob");
+    const result = await put(key, buffer, {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: 31536000,
+      token: BLOB_TOKEN
+    });
+    return result.url;
+  }
+
   const dir = path.join(process.cwd(), "images", "uploads");
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(path.join(dir, name), buffer);
@@ -142,6 +186,10 @@ async function readMedia(name) {
     return file ? file.buffer : null;
   }
 
+  /* Blob serves its own files straight from its CDN, so /api/media is only
+     ever asked for one when the store is git or local. */
+  if (USE_BLOB) return null;
+
   try {
     return await fs.readFile(path.join(process.cwd(), "images", "uploads", name));
   } catch (err) {
@@ -152,6 +200,7 @@ async function readMedia(name) {
 
 async function mediaExists(name) {
   if (USE_GITHUB) return (await github.getFile(MEDIA_PREFIX + name)) !== null;
+  if (USE_BLOB) return false;
   try {
     await fs.access(path.join(process.cwd(), "images", "uploads", name));
     return true;
@@ -161,8 +210,8 @@ async function mediaExists(name) {
 }
 
 module.exports = {
-  storageKind: USE_GITHUB ? "git" : "local",
-  isPersistent: USE_GITHUB,
+  storageKind: USE_GITHUB ? "git" : (USE_BLOB ? "blob" : "local"),
+  isPersistent: USE_GITHUB || USE_BLOB,
   gitInfo: github.describe(),
   readContent,
   writeContent,
