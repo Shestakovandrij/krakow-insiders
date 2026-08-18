@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "updatedAt": "",
+  "tours": [
+    {
+      "id": "auschwitz",
+      "kind": "tour",
+      "visible": true,
+      "image": "images/tour-auschwitz.jpg",
+      "imageAlt": "Auschwitz-Birkenau memorial — guided tour from Kraków",
+      "imageFocus": "",
+      "price": { "amount": "380 zł", "from": false, "unit": "person" },
+      "whatsappType": "Auschwitz-Birkenau Tour",
+      "en": {
+        "tag": "6–7 hours",
+        "title": "Auschwitz-Birkenau Tour",
+        "desc": "A deeply important historical journey to Auschwitz-Birkenau with organized transport, tickets and English-speaking support."
+      },
+      "pl": {
+        "tag": "6–7 godzin",
+        "title": "Wycieczka do Auschwitz-Birkenau",
+        "desc": "Głęboko ważna historyczna podróż do Auschwitz-Birkenau ze zorganizowanym transportem, biletami i anglojęzyczną opieką."
+      }
+    },
+    {
+      "id": "wieliczka",
+      "kind": "tour",
+      "visible": true,
+      "image": "images/tour-wieliczka.jpg",
+      "imageAlt": "Underground chambers of the Wieliczka Salt Mine",
+      "imageFocus": "",
+      "price": { "amount": "320 zł", "from": false, "unit": "person" },
+      "whatsappType": "Wieliczka Salt Mine Tour",
+      "en": {
+        "tag": "4–5 hours",
+        "title": "Wieliczka Salt Mine Tour",
+        "desc": "Explore one of Poland’s most iconic underground wonders with convenient transfer and organized entry."
+      },
+      "pl": {
+        "tag": "4–5 godzin",
+        "title": "Wycieczka do Kopalni Soli w Wieliczce",
+        "desc": "Odkryj jeden z najbardziej kultowych podziemnych cudów Polski z wygodnym transferem i zorganizowanym wejściem."
+      }
+    },
+    {
+      "id": "zakopane",
+      "kind": "tour",
+      "visible": true,
+      "image": "images/tour-zakopane.jpg",
+      "imageAlt": "Tatra Mountains landscape near Zakopane",
+      "imageFocus": "",
+      "price": { "amount": "450 zł", "from": true, "unit": "person" },
+      "whatsappType": "Zakopane & Tatra Mountains Tour",
+      "en": {
+        "tag": "Full day",
+        "title": "Zakopane & Tatra Mountains Tours",
+        "desc": "A full-day mountain escape from Kraków with flexible routes, local food, nature, thermal baths and adventure options."
+      },
+      "pl": {
+        "tag": "Cały dzień",
+        "title": "Zakopane i Tatry",
+        "desc": "Całodniowa górska wyprawa z Krakowa z elastycznymi trasami, lokalnym jedzeniem, przyrodą, termami i opcjami pełnymi przygód."
+      }
+    },
+    {
+      "id": "shooting",
+      "kind": "tour",
+      "visible": true,
+      "image": "images/tour-shooting.jpg",
+      "imageAlt": "Shooting range experience near Kraków",
+      "imageFocus": "",
+      "price": { "amount": "190 zł", "from": true, "unit": "person" },
+      "whatsappType": "Shooting Range Experience",
+      "en": {
+        "tag": "2 hours",
+        "title": "Shooting Range Experience",
+        "desc": "A safe and exciting shooting range experience with transfer, instructor guidance and professional safety briefing."
+      },
+      "pl": {
+        "tag": "2 godziny",
+        "title": "Strzelnica — strzeleckie doświadczenie",
+        "desc": "Bezpieczne i ekscytujące doświadczenie na strzelnicy z transferem, opieką instruktora i profesjonalnym szkoleniem z zasad bezpieczeństwa."
+      }
+    },
+    {
+      "id": "schindler",
+      "kind": "tour",
+      "visible": true,
+      "image": "images/tour-schindler.jpg",
+      "imageAlt": "Oskar Schindler’s Factory Museum in Kraków",
+      "imageFocus": "",
+      "price": { "amount": "150 zł", "from": true, "unit": "person" },
+      "whatsappType": "Oskar Schindler's Factory Museum",
+      "en": {
+        "tag": "2–2.5 hours",
+        "title": "Oskar Schindler’s Factory Museum",
+        "desc": "Visit one of Kraków’s most meaningful museums and discover the wartime story of the city through a powerful exhibition."
+      },
+      "pl": {
+        "tag": "2–2,5 godziny",
+        "title": "Muzeum — Fabryka Oskara Schindlera",
+        "desc": "Odwiedź jedno z najbardziej poruszających muzeów Krakowa i poznaj wojenną historię miasta poprzez przejmującą wystawę."
+      }
+    },
+    {
+      "id": "energylandia",
+      "kind": "tour",
+      "visible": true,
+      "image": "images/tour-energylandia.jpg",
+      "imageAlt": "Roller coaster and main gate of the Energylandia amusement park in Zator",
+      "imageFocus": "left",
+      "price": { "amount": "450 zł", "from": false, "unit": "personDay" },
+      "whatsappType": "Energylandia Amusement Park",
+      "en": {
+        "tag": "Full day",
+        "title": "Energylandia Amusement Park",
+        "desc": "Poland’s largest amusement park in Zator, with a private door-to-door transfer from your hotel in Kraków and a comfortable ride back after a full day of excitement."
+      },
+      "pl": {
+        "tag": "Cały dzień",
+        "title": "Park rozrywki Energylandia",
+        "desc": "Największy park rozrywki w Polsce w Zatorze, z prywatnym transferem door-to-door spod hotelu w Krakowie i komfortowym powrotem po pełnym wrażeń dniu."
+      }
+    },
+    {
+      "id": "custom",
+      "kind": "custom",
+      "visible": true,
+      "image": "",
+      "imageAlt": "",
+      "imageFocus": "",
+      "price": { "amount": "", "from": false, "unit": "" },
+      "whatsappType": "",
+      "en": {
+        "tag": "Tailor-made",
+        "title": "Custom Private Tours",
+        "desc": "Have a different idea for your visit? Message us on WhatsApp and we’ll plan a custom itinerary just for you."
+      },
+      "pl": {
+        "tag": "Na zamówienie",
+        "title": "Wycieczki szyte na miarę",
+        "desc": "Masz inny pomysł na zwiedzanie? Napisz do nas na WhatsApp, a przygotujemy indywidualny plan wycieczki specjalnie dla Ciebie."
+      }
+    }
+  ],
+  "videoReviews": [
+    { "id": "v1", "visible": true, "name": "Amelia", "date": "12.03.2026", "photo": "images/review-1.webp", "video": "media/hero-card.mp4", "videoWebm": "media/hero-card.webm" },
+    { "id": "v2", "visible": true, "name": "Marco", "date": "28.02.2026", "photo": "images/review-2.webp", "video": "media/hero-card.mp4", "videoWebm": "media/hero-card.webm" },
+    { "id": "v3", "visible": true, "name": "Sofia", "date": "05.05.2026", "photo": "images/review-3.webp", "video": "media/hero-card.mp4", "videoWebm": "media/hero-card.webm" },
+    { "id": "v4", "visible": true, "name": "Declan", "date": "19.04.2026", "photo": "images/review-4.webp", "video": "media/hero-card.mp4", "videoWebm": "media/hero-card.webm" },
+    { "id": "v5", "visible": true, "name": "Lena", "date": "30.05.2026", "photo": "images/about-3.webp", "video": "media/hero-card.mp4", "videoWebm": "media/hero-card.webm" },
+    { "id": "v6", "visible": true, "name": "Thomas", "date": "11.06.2026", "photo": "images/services.webp", "video": "media/hero-card.mp4", "videoWebm": "media/hero-card.webm" }
+  ],
+  "textReviews": [
+    {
+      "id": "r1", "visible": true, "avatar": "images/review-1.webp", "date": "12.03.2026", "stars": 5,
+      "en": { "author": "Amelia — United Kingdom", "text": "The transfer was smooth, the communication was clear, and the whole day felt perfectly organized. We didn’t have to worry about timing or tickets." },
+      "pl": { "author": "Amelia — Wielka Brytania", "text": "Transfer przebiegł sprawnie, komunikacja była jasna, a cały dzień był perfekcyjnie zorganizowany. Nie musieliśmy martwić się o czas ani bilety." }
+    },
+    {
+      "id": "r2", "visible": true, "avatar": "images/review-2.webp", "date": "28.02.2026", "stars": 5,
+      "en": { "author": "Marco — Italy", "text": "Our guide made Kraków feel personal, not touristy. The experience was thoughtful, comfortable and very easy to book." },
+      "pl": { "author": "Marco — Włochy", "text": "Dzięki naszemu przewodnikowi Kraków wydawał się osobisty, a nie turystyczny. Całość była przemyślana, komfortowa i bardzo łatwa do zarezerwowania." }
+    },
+    {
+      "id": "r3", "visible": true, "avatar": "images/review-3.webp", "date": "05.05.2026", "stars": 5,
+      "en": { "author": "Sofia — Spain", "text": "We booked a private transfer and later added a tour. Everything was handled quickly through WhatsApp and the driver was excellent." },
+      "pl": { "author": "Sofia — Hiszpania", "text": "Zarezerwowaliśmy prywatny transfer, a później dodaliśmy wycieczkę. Wszystko załatwiliśmy szybko przez WhatsApp, a kierowca był znakomity." }
+    },
+    {
+      "id": "r4", "visible": true, "avatar": "images/review-4.webp", "date": "19.04.2026", "stars": 5,
+      "en": { "author": "Declan — Ireland", "text": "Auschwitz-Birkenau was a difficult but important visit. The logistics were handled very professionally from hotel pickup to return." },
+      "pl": { "author": "Declan — Irlandia", "text": "Auschwitz-Birkenau to trudna, ale ważna wizyta. Logistyka była zorganizowana bardzo profesjonalnie — od odbioru z hotelu po powrót." }
+    },
+    {
+      "id": "r5", "visible": true, "avatar": "images/about-3.webp", "date": "30.05.2026", "stars": 5,
+      "en": { "author": "Lena — Germany", "text": "The Wieliczka Salt Mine trip was perfectly timed and our guide was full of stories. Pickup and return were exactly on schedule." },
+      "pl": { "author": "Lena — Niemcy", "text": "Wycieczka do Kopalni Soli w Wieliczce była idealnie zaplanowana, a nasz przewodnik miał mnóstwo ciekawych historii. Odbiór i powrót odbyły się dokładnie na czas." }
+    },
+    {
+      "id": "r6", "visible": true, "avatar": "images/services.webp", "date": "11.06.2026", "stars": 5,
+      "en": { "author": "Thomas — Netherlands", "text": "We arranged a full day in Zakopane over WhatsApp in minutes. Comfortable car, relaxed pace and a driver who genuinely knew the mountains." },
+      "pl": { "author": "Thomas — Holandia", "text": "Cały dzień w Zakopanem umówiliśmy przez WhatsApp w kilka minut. Komfortowy samochód, spokojne tempo i kierowca, który naprawdę znał góry." }
+    }
+  ]
+}
