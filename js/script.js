@@ -312,6 +312,13 @@
       });
     });
 
+    var reviewModal = document.getElementById("reviewModal");
+    document.querySelectorAll("[data-open-review]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (reviewModal) showModal(reviewModal);
+      });
+    });
+
     document.querySelectorAll("[data-open-video]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         if (videoModal) showModal(videoModal);
@@ -620,6 +627,12 @@
 
   /* Video reviews play inline inside their tile — a play tap swaps the poster
      for a <video> element right in the section (no full-screen modal). */
+  function guessVideoType(url) {
+    if (/\.webm(\?|$)/i.test(url)) return "video/webm";
+    if (/\.mov(\?|$)/i.test(url)) return "video/quicktime";
+    return "video/mp4";
+  }
+
   function initInlineReviewVideos() {
     var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-play-inline]"));
     if (!buttons.length) return;
@@ -663,7 +676,18 @@
         video.playsInline = true;
         video.setAttribute("playsinline", "");
         video.preload = "auto";
-        [["media/hero-card.webm", "video/webm"], ["media/hero-card.mp4", "video/mp4"]].forEach(function (s) {
+
+        /* Each tile carries its own clip (the panel uploads one per review).
+           The webm is optional — it only exists for the files that shipped
+           with the site, so a review uploaded later plays from its mp4. */
+        var sources = [];
+        var webm = media.getAttribute("data-video-webm");
+        var main = media.getAttribute("data-video");
+        if (webm) sources.push([webm, "video/webm"]);
+        if (main) sources.push([main, guessVideoType(main)]);
+        if (!sources.length) return;
+
+        sources.forEach(function (s) {
           var source = document.createElement("source");
           source.src = s[0];
           source.type = s[1];
@@ -1011,10 +1035,206 @@
   }
 
   /* ========================================================================
+     Visitor review form
+
+     Anything sent here lands in a moderation queue, never straight on the
+     page — so the form's job is only to collect it cleanly and say so.
+     ======================================================================== */
+
+  var REVIEW_ENDPOINT = "/api/review-submit";
+  var REVIEW_UPLOAD_ENDPOINT = "/api/upload";
+
+  var REVIEW_LIMITS = {
+    image: 6 * 1024 * 1024,
+    video: 60 * 1024 * 1024
+  };
+
+  function initRating(form) {
+    var group = form.querySelector("#rvRating");
+    var field = form.querySelector("#rv-stars");
+    if (!group || !field) return;
+
+    var stars = Array.prototype.slice.call(group.querySelectorAll(".rating__star"));
+
+    function paint(value) {
+      stars.forEach(function (star) {
+        var starValue = parseInt(star.getAttribute("data-value"), 10);
+        star.classList.toggle("is-on", starValue <= value);
+        star.setAttribute("aria-checked", String(starValue === value));
+      });
+      field.value = String(value);
+    }
+
+    stars.forEach(function (star) {
+      star.addEventListener("click", function () {
+        paint(parseInt(star.getAttribute("data-value"), 10));
+      });
+    });
+
+    group.addEventListener("keydown", function (e) {
+      var current = parseInt(field.value, 10) || 5;
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+        e.preventDefault();
+        paint(Math.max(1, current - 1));
+      } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+        e.preventDefault();
+        paint(Math.min(5, current + 1));
+      }
+    });
+
+    paint(parseInt(field.value, 10) || 5);
+  }
+
+  /* Files go straight to storage from here, the same way the panel sends
+     them — the response carries back the URL that travels with the review. */
+  function uploadReviewFile(file, onProgress) {
+    var isVideo = file.type.indexOf("video/") === 0;
+    var limit = isVideo ? REVIEW_LIMITS.video : REVIEW_LIMITS.image;
+    if (file.size > limit) {
+      return Promise.reject(new Error("too-large"));
+    }
+
+    var name = "reviews/" + Date.now() + "-" + file.name.replace(/[^A-Za-z0-9._-]+/g, "-");
+
+    return import("./vendor/blob-client.js")
+      .then(function (blob) {
+        return blob.upload(name, file, {
+          access: "public",
+          handleUploadUrl: REVIEW_UPLOAD_ENDPOINT,
+          contentType: file.type,
+          onUploadProgress: function (event) {
+            if (onProgress) onProgress(event.percentage || 0);
+          }
+        }).then(function (result) { return result.url; });
+      })
+      .catch(function (err) {
+        if (err && err.message === "too-large") throw err;
+        /* No Blob store configured (a local run, mostly): the same file goes
+           through the function instead. */
+        return fetch(REVIEW_UPLOAD_ENDPOINT + "?scope=review&name=" + encodeURIComponent(file.name), {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file
+        }).then(function (response) {
+          return response.json().then(function (data) {
+            if (!response.ok || !data.ok) throw new Error(data.error || "upload-failed");
+            return data.url;
+          });
+        });
+      });
+  }
+
+  function validateReviewForm(form) {
+    var ok = true;
+
+    var name = form.querySelector("#rv-name");
+    var text = form.querySelector("#rv-text");
+
+    [[name, name.value.trim().length >= 2], [text, text.value.trim().length >= 20]]
+      .forEach(function (pair) {
+        var field = pair[0].closest(".form-field");
+        if (!field) return;
+        field.classList.toggle("has-error", !pair[1]);
+        if (!pair[1]) ok = false;
+      });
+
+    return ok;
+  }
+
+  function initReviewForm() {
+    var form = document.getElementById("reviewForm");
+    if (!form) return;
+
+    initRating(form);
+
+    var progress = form.querySelector("#rvProgress");
+    var progressValue = form.querySelector("#rvProgressValue");
+
+    ["input", "change"].forEach(function (evt) {
+      form.addEventListener(evt, function (e) {
+        if (e.target && e.target.closest) {
+          var field = e.target.closest(".form-field");
+          if (field) field.classList.remove("has-error");
+        }
+        form.classList.remove("is-error");
+      });
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      form.classList.remove("is-success", "is-error");
+
+      if (!validateReviewForm(form)) return;
+
+      var photoFile = form.querySelector("#rv-photo").files[0] || null;
+      var videoFile = form.querySelector("#rv-video").files[0] || null;
+
+      form.classList.add("is-sending");
+
+      function withProgress(label) {
+        return function (percentage) {
+          if (!progress || !progressValue) return;
+          progress.hidden = false;
+          progressValue.textContent = label + " " + Math.round(percentage) + "%";
+        };
+      }
+
+      var uploads = Promise.resolve({ photo: "", video: "" });
+
+      if (photoFile) {
+        uploads = uploads.then(function (media) {
+          return uploadReviewFile(photoFile, withProgress("1/2")).then(function (url) {
+            media.photo = url;
+            return media;
+          });
+        });
+      }
+      if (videoFile) {
+        uploads = uploads.then(function (media) {
+          return uploadReviewFile(videoFile, withProgress(photoFile ? "2/2" : "1/1")).then(function (url) {
+            media.video = url;
+            return media;
+          });
+        });
+      }
+
+      uploads
+        .then(function (media) {
+          if (progress) progress.hidden = true;
+          return fetch(REVIEW_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: form.querySelector("#rv-name").value,
+              country: form.querySelector("#rv-country").value,
+              text: form.querySelector("#rv-text").value,
+              stars: form.querySelector("#rv-stars").value,
+              photo: media.photo,
+              video: media.video,
+              website: form.querySelector("#rv-website").value
+            })
+          });
+        })
+        .then(function (response) {
+          if (!response.ok) throw new Error("review endpoint responded with " + response.status);
+          form.classList.remove("is-sending");
+          form.classList.add("is-success");
+          form.reset();
+          initRating(form);
+        })
+        .catch(function () {
+          if (progress) progress.hidden = true;
+          form.classList.remove("is-sending");
+          form.classList.add("is-error");
+        });
+    });
+  }
+
+  /* ========================================================================
      Init
      ======================================================================== */
 
-  document.addEventListener("DOMContentLoaded", function () {
+  function boot() {
     if (hasGsap && window.ScrollTrigger) {
       gsap.registerPlugin(ScrollTrigger);
       if (window.SplitText) gsap.registerPlugin(SplitText);
@@ -1035,6 +1255,7 @@
     initInlineReviewVideos();
     initLeadForm(document.getElementById("contactForm"));
     initLeadForm(document.getElementById("bookingForm"));
+    initReviewForm();
 
     initHeroAnimation();
     if (currentLang === "en") {
@@ -1043,5 +1264,18 @@
     }
     initCounters();
     initStepScrub();
+  }
+
+  /* Tours and reviews are rendered from JSON by js/content.js. Everything
+     below — reveals, the review slider, the WhatsApp links — reads the DOM
+     once at startup, so booting before those cards exist would leave them
+     dead. Waiting on that promise is what keeps the wiring honest.
+
+     It resolves even when the content fails to load, and if content.js is
+     absent the site boots exactly as it used to. */
+  document.addEventListener("DOMContentLoaded", function () {
+    var ready = window.KI_CONTENT_READY;
+    if (ready && typeof ready.then === "function") ready.then(boot, boot);
+    else boot();
   });
 })();

@@ -42,44 +42,16 @@ window.KI_TRANSLATIONS = {
     "about.facts": "4+ lata doświadczenia · 100% organizacji od A do Z · Kraków i okolice",
     "about.cta": "Skontaktuj się z nami",
 
-
     /* ---------- Popular Tours ---------- */
     "tours.title": "Popularne wycieczki",
     "tours.intro": "Odkryj najczęściej wybierane doświadczenia z Krakowa — od historycznych miejsc po górskie przygody i wyjątkowe lokalne atrakcje.",
     "tours.lead": "Odkryj najczęściej wybierane doświadczenia z Krakowa — od historycznych miejsc po górskie przygody i wyjątkowe lokalne atrakcje",
-    "tours.tagCustom": "Na zamówienie",
     "tours.priceUnit": "/ os.",
     "tours.priceUnitDay": "/ os., cały dzień",
     "tours.priceFrom": "od",
 
-    "tours.t1.title": "Wycieczka do Auschwitz-Birkenau",
-    "tours.t1.tag": "6–7 godzin",
-    "tours.t1.desc": "Głęboko ważna historyczna podróż do Auschwitz-Birkenau ze zorganizowanym transportem, biletami i anglojęzyczną opieką.",
-
-    "tours.t2.title": "Wycieczka do Kopalni Soli w Wieliczce",
-    "tours.t2.tag": "4–5 godzin",
-    "tours.t2.desc": "Odkryj jeden z najbardziej kultowych podziemnych cudów Polski z wygodnym transferem i zorganizowanym wejściem.",
-
-    "tours.t3.title": "Zakopane i Tatry",
-    "tours.t3.tag": "Cały dzień",
-    "tours.t3.desc": "Całodniowa górska wyprawa z Krakowa z elastycznymi trasami, lokalnym jedzeniem, przyrodą, termami i opcjami pełnymi przygód.",
-
-    "tours.t4.title": "Strzelnica — strzeleckie doświadczenie",
-    "tours.t4.tag": "2 godziny",
-    "tours.t4.desc": "Bezpieczne i ekscytujące doświadczenie na strzelnicy z transferem, opieką instruktora i profesjonalnym szkoleniem z zasad bezpieczeństwa.",
-
-    "tours.t5.title": "Muzeum — Fabryka Oskara Schindlera",
-    "tours.t5.tag": "2–2,5 godziny",
-    "tours.t5.desc": "Odwiedź jedno z najbardziej poruszających muzeów Krakowa i poznaj wojenną historię miasta poprzez przejmującą wystawę.",
-
-    "tours.t6.title": "Park rozrywki Energylandia",
-    "tours.t6.tag": "Cały dzień",
-    "tours.t6.desc": "Największy park rozrywki w Polsce w Zatorze, z prywatnym transferem door-to-door spod hotelu w Krakowie i komfortowym powrotem po pełnym wrażeń dniu.",
-
-    "tours.custom.title": "Wycieczki szyte na miarę",
-    "tours.custom.desc": "Masz inny pomysł na zwiedzanie? Napisz do nas na WhatsApp, a przygotujemy indywidualny plan wycieczki specjalnie dla Ciebie.",
-
     /* ---------- Private Transfers ---------- */
+    "transfers.quote": "Transfer przebiegł sprawnie, komunikacja była jasna, a cały dzień był perfekcyjnie zorganizowany. Nie musieliśmy martwić się o czas ani bilety.",
     "transfers.title": "Transfery prywatne",
     "transfers.intro": "Komfortowe prywatne transfery door-to-door z lotniska w Krakowie do centrum miasta, hoteli lub pod dowolny wskazany adres. Nasi zawodowi kierowcy odbiorą Cię z tabliczką z imieniem w strefie przylotów, pomogą z bagażem i zapewnią szybki, bezpieczny przejazd nowoczesnym samochodem w stałej cenie. Wyślij nam swoją trasę, a dobierzemy najlepszą opcję dopasowaną do Twojego planu!",
     "transfers.tag": "Od drzwi do drzwi",
@@ -147,18 +119,24 @@ window.KI_TRANSLATIONS = {
     "reviews.videoLabel": "Opinia podróżnego",
     "reviews.tabVideo": "Wideo-opinie",
     "reviews.tabText": "Opinie tekstowe",
-    "reviews.r1.text": "Transfer przebiegł sprawnie, komunikacja była jasna, a cały dzień był perfekcyjnie zorganizowany. Nie musieliśmy martwić się o czas ani bilety.",
-    "reviews.r1.author": "Amelia — Wielka Brytania",
-    "reviews.r2.text": "Dzięki naszemu przewodnikowi Kraków wydawał się osobisty, a nie turystyczny. Całość była przemyślana, komfortowa i bardzo łatwa do zarezerwowania.",
-    "reviews.r2.author": "Marco — Włochy",
-    "reviews.r3.text": "Zarezerwowaliśmy prywatny transfer, a później dodaliśmy wycieczkę. Wszystko załatwiliśmy szybko przez WhatsApp, a kierowca był znakomity.",
-    "reviews.r3.author": "Sofia — Hiszpania",
-    "reviews.r4.text": "Auschwitz-Birkenau to trudna, ale ważna wizyta. Logistyka była zorganizowana bardzo profesjonalnie — od odbioru z hotelu po powrót.",
-    "reviews.r4.author": "Declan — Irlandia",
-    "reviews.r5.text": "Wycieczka do Kopalni Soli w Wieliczce była idealnie zaplanowana, a nasz przewodnik miał mnóstwo ciekawych historii. Odbiór i powrót odbyły się dokładnie na czas.",
-    "reviews.r5.author": "Lena — Niemcy",
-    "reviews.r6.text": "Cały dzień w Zakopanem umówiliśmy przez WhatsApp w kilka minut. Komfortowy samochód, spokojne tempo i kierowca, który naprawdę znał góry.",
-    "reviews.r6.author": "Thomas — Holandia",
+    "reviews.write": "Napisz opinię",
+
+    /* ---------- Formularz opinii ---------- */
+    "review.title": "Podziel się wrażeniami",
+    "review.text": "Opowiedz innym podróżnym, jak minął Wam dzień z nami. Każdą opinię czytamy, zanim pojawi się na stronie.",
+    "review.name": "Imię",
+    "review.country": "Kraj",
+    "review.rating": "Ocena",
+    "review.message": "Twoja opinia",
+    "review.photo": "Zdjęcie (opcjonalnie)",
+    "review.video": "Wideo (opcjonalnie)",
+    "review.submit": "Wyślij opinię",
+    "review.uploading": "Wysyłanie",
+    "review.note": "Opinie publikujemy po sprawdzeniu, więc może to potrwać dzień lub dwa.",
+    "review.success": "Dziękujemy! Opinia została wysłana i pojawi się, gdy ją przeczytamy.",
+    "review.error": "Coś poszło nie tak. Spróbuj ponownie albo wyślij nam opinię na WhatsAppie.",
+    "review.errName": "Podaj swoje imię.",
+    "review.errText": "Napisz przynajmniej kilka zdań.",
 
     /* ---------- FAQ ---------- */
     "faq.title": "Najczęściej zadawane pytania",

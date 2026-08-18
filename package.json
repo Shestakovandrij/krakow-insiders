@@ -1,0 +1,12 @@
+{
+  "name": "krakow-insiders",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Krakow Insiders — private tours and transfers in Kraków. Static site with serverless functions for leads, content and the admin panel.",
+  "scripts": {
+    "build:blob-client": "echo 'export { upload } from \"@vercel/blob/client\";' > .blob-entry.js && esbuild .blob-entry.js --bundle --format=esm --platform=browser --minify --target=es2019 --define:process='{\"env\":{}}' --outfile=js/vendor/blob-client.js && rm .blob-entry.js"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0"
+  }
+}

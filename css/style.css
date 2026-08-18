@@ -2900,3 +2900,92 @@ body.modal-open { overflow: hidden; }
   [data-reveal] { opacity: 1; transform: none; }
   .cta-marquee-track { animation: none; }
 }
+
+/* ==========================================================================
+   Відгук від відвідувача — кнопка в блоці «What Travelers Say» і форма
+   в поп-апі. Спирається на .lead-form, тож тут лише те, чого там не було.
+   ========================================================================== */
+
+.reviews-write { margin-top: 4px; }
+
+/* Оцінка зірками. Під нею лежить прихований input із числом, тож форма
+   надсилає звичайне значення навіть якщо скрипт не відпрацював. */
+.rating {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.rating__star {
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: var(--border-04);
+  cursor: pointer;
+  transition: color 0.18s var(--ease-premium), transform 0.12s var(--ease-premium);
+}
+
+.rating__star.is-on { color: var(--gold); }
+.rating__star:hover { transform: translateY(-1px); }
+
+.rating__star:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.form-field__legend {
+  font-size: var(--p2-size);
+  font-weight: 500;
+  color: var(--text-02);
+}
+
+.lead-form__hint {
+  margin: 0;
+  font-size: var(--p3-size);
+  color: var(--text-02);
+}
+
+.lead-form__progress {
+  margin: 0;
+  font-size: var(--p2-size);
+  font-weight: 500;
+  color: var(--text-02);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Поле-пастка для ботів: прибране з потоку так, щоб не спрацював
+   autofill і щоб екранні читачі його не оголошували. */
+.form-trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Файлові поля в темі сайту */
+.form-field input[type="file"] {
+  font-size: var(--p3-size);
+  color: var(--text-02);
+  padding: 10px 12px;
+}
+
+.form-field input[type="file"]::file-selector-button {
+  font: inherit;
+  font-weight: 500;
+  margin-right: 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--border-04);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.18s var(--ease-premium);
+}
+
+.form-field input[type="file"]::file-selector-button:hover {
+  background: var(--bg-04);
+}
