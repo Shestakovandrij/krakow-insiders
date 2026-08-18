@@ -4,25 +4,27 @@
    The panel keeps content in JSON, not in a database. Where that JSON lives
    depends on the environment:
 
-     - On Vercel the filesystem is read-only, so the JSON goes to Vercel Blob
-       (private blobs — only these functions can read them).
-     - Locally there is no Blob token, so the same JSON goes to .local-store/
-       on disk. That makes the whole panel testable before deploying.
+     - Deployed, with a GitHub token: on the repository's `panel-data`
+       branch. Every save is a commit, so the history of the site's content
+       is the history of that branch and a bad edit is one revert away.
 
-   Both branches expose the same three calls, so nothing above this file has
-   to know which one is active.
+     - Locally, with no token: in .local-store/ on disk. Same shape, same
+       calls, so the whole panel can be exercised before deploying.
+
+   Nothing above this file knows which one is active.
    ========================================================================== */
 
 const fs = require("fs/promises");
 const path = require("path");
+
+const github = require("./github");
 
 /* The seed shipped with the repository. Required statically so Vercel's
    dependency tracing bundles it with the function; a runtime fs.readFile of
    the same path would not be traced and would 404 in production. */
 const SEED_CONTENT = require("../../data/content.json");
 
-const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || "";
-const USE_BLOB = BLOB_TOKEN.length > 0;
+const USE_GITHUB = github.isConfigured();
 const LOCAL_DIR = path.join(process.cwd(), ".local-store");
 
 const CONTENT_KEY = "content.json";
@@ -38,17 +40,8 @@ function clone(value) {
    -------------------------------------------------------------------------- */
 
 async function readJson(key) {
-  if (USE_BLOB) {
-    const { get } = require("@vercel/blob");
-    /* useCache: false — the panel must read back exactly what it just wrote,
-       and a CDN-cached copy would show the previous version for minutes. */
-    const result = await get(key, {
-      access: "private",
-      useCache: false,
-      token: BLOB_TOKEN
-    });
-    if (!result || !result.stream) return null;
-    const text = await new Response(result.stream).text();
+  if (USE_GITHUB) {
+    const text = await github.readText(key);
     return text ? JSON.parse(text) : null;
   }
 
@@ -61,19 +54,11 @@ async function readJson(key) {
   }
 }
 
-async function writeJson(key, value) {
-  const text = JSON.stringify(value, null, 2);
+async function writeJson(key, value, message) {
+  const text = JSON.stringify(value, null, 2) + "\n";
 
-  if (USE_BLOB) {
-    const { put } = require("@vercel/blob");
-    await put(key, text, {
-      access: "private",
-      contentType: "application/json",
-      addRandomSuffix: false,
-      allowOverwrite: true,
-      cacheControlMaxAge: 0,
-      token: BLOB_TOKEN
-    });
+  if (USE_GITHUB) {
+    await github.writeText(key, text, message || ("Update " + key));
     return;
   }
 
@@ -85,7 +70,7 @@ async function writeJson(key, value) {
    Content
    -------------------------------------------------------------------------- */
 
-/* Nothing saved yet — a fresh deploy, or a store that was wiped — falls back
+/* Nothing saved yet — a fresh deploy, or a branch that was wiped — falls back
    to the seed, so the site always has tours and reviews to render. */
 async function readContent() {
   const stored = await readJson(CONTENT_KEY);
@@ -93,8 +78,8 @@ async function readContent() {
   return clone(SEED_CONTENT);
 }
 
-async function writeContent(content) {
-  await writeJson(CONTENT_KEY, content);
+async function writeContent(content, message) {
+  await writeJson(CONTENT_KEY, content, message || "Panel: update tours and reviews");
 }
 
 function seedContent() {
@@ -113,8 +98,8 @@ async function readPending() {
   return stored && Array.isArray(stored.reviews) ? stored.reviews : [];
 }
 
-async function writePending(reviews) {
-  await writeJson(PENDING_KEY, { version: 1, reviews: reviews });
+async function writePending(reviews, message) {
+  await writeJson(PENDING_KEY, { version: 1, reviews: reviews }, message || "Panel: update the review queue");
 }
 
 /* --------------------------------------------------------------------------
@@ -125,17 +110,68 @@ async function readConfig() {
   return readJson(CONFIG_KEY);
 }
 
-async function writeConfig(config) {
-  await writeJson(CONFIG_KEY, config);
+async function writeConfig(config, message) {
+  await writeJson(CONFIG_KEY, config, message || "Panel: update credentials");
+}
+
+/* --------------------------------------------------------------------------
+   Media
+   -------------------------------------------------------------------------- */
+
+const MEDIA_PREFIX = "media/";
+
+async function writeMedia(name, buffer, message) {
+  const key = MEDIA_PREFIX + name;
+
+  if (USE_GITHUB) {
+    await github.putFile(key, buffer, message || ("Panel: add " + key));
+    /* Served through /api/media rather than a static path: the branch is not
+       deployed, and once the repository is private nothing else can read it. */
+    return "/m/" + name;
+  }
+
+  const dir = path.join(process.cwd(), "images", "uploads");
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, name), buffer);
+  return "images/uploads/" + name;
+}
+
+async function readMedia(name) {
+  if (USE_GITHUB) {
+    const file = await github.getFile(MEDIA_PREFIX + name);
+    return file ? file.buffer : null;
+  }
+
+  try {
+    return await fs.readFile(path.join(process.cwd(), "images", "uploads", name));
+  } catch (err) {
+    if (err.code === "ENOENT") return null;
+    throw err;
+  }
+}
+
+async function mediaExists(name) {
+  if (USE_GITHUB) return (await github.getFile(MEDIA_PREFIX + name)) !== null;
+  try {
+    await fs.access(path.join(process.cwd(), "images", "uploads", name));
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 module.exports = {
-  isBlobConfigured: USE_BLOB,
+  storageKind: USE_GITHUB ? "git" : "local",
+  isPersistent: USE_GITHUB,
+  gitInfo: github.describe(),
   readContent,
   writeContent,
   seedContent,
   readPending,
   writePending,
   readConfig,
-  writeConfig
+  writeConfig,
+  writeMedia,
+  readMedia,
+  mediaExists
 };

@@ -7,15 +7,18 @@
    ========================================================================== */
 
 const auth = require("./_lib/auth");
+const store = require("./_lib/store");
 const {
   readContent, writeContent, seedContent,
-  readPending, writePending, isBlobConfigured
-} = require("./_lib/store");
+  readPending, writePending
+} = store;
 const {
   normalizeContent, normalizePendingList,
   approveAsTextReview, approveAsVideoReview
 } = require("./_lib/content-schema");
 const { readJsonBody, sendJson } = require("./_lib/http");
+
+const BLOB_CONFIGURED = (process.env.BLOB_READ_WRITE_TOKEN || "").length > 0;
 
 const PUBLIC_ACTIONS = ["status", "setup", "login"];
 
@@ -85,8 +88,13 @@ async function handleStatus(req, res) {
     authenticated: passwordSet ? await auth.hasValidSession(req) : false,
     minPasswordLength: auth.MIN_PASSWORD_LENGTH,
     /* The panel warns when this is false: locally that is expected, on a
-       deploy it means edits would be lost on the next release. */
-    persistentStorage: isBlobConfigured
+       deploy it means the GitHub token is missing and edits would be lost. */
+    persistentStorage: store.isPersistent,
+    storageKind: store.storageKind,
+    /* Decides how the panel uploads. Without a Blob store the file passes
+       through the function, and Vercel will not carry more than this. */
+    directUpload: !BLOB_CONFIGURED,
+    maxUploadBytes: BLOB_CONFIGURED ? 300 * 1024 * 1024 : 4 * 1024 * 1024
   });
 }
 

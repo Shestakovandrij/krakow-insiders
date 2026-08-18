@@ -32,6 +32,9 @@
     tab: "tours",
     subtab: "video",
     persistentStorage: true,
+    storageKind: "git",
+    directUpload: true,
+    maxUploadBytes: 4 * 1024 * 1024,
     minPasswordLength: 10
   };
 
@@ -129,6 +132,9 @@
       if (!data.ok) throw new Error("status-failed");
 
       state.persistentStorage = data.persistentStorage !== false;
+      state.storageKind = data.storageKind || "git";
+      state.directUpload = data.directUpload !== false;
+      state.maxUploadBytes = data.maxUploadBytes || 4 * 1024 * 1024;
       state.minPasswordLength = data.minPasswordLength || 10;
       dom.setupHint.textContent = "Мінімум " + state.minPasswordLength + " символів";
 
@@ -151,10 +157,19 @@
     return loadContent();
   }
 
+  /* Підказка під полем відео залежить від того, скільки цей деплой узагалі
+     здатен прийняти, тож рахується, а не пишеться в розмітці. */
+  function videoHint() {
+    var limit = Math.round(state.maxUploadBytes / 1048576);
+    return state.directUpload
+      ? "MP4, WebM або MOV до " + limit + " МБ. Довше відео вставте посиланням у поле нижче."
+      : "MP4, WebM або MOV до " + limit + " МБ. Програється просто в плитці.";
+  }
+
   function loadContent() {
     return api("load").then(function (data) {
       if (!data.ok) {
-        notify("Не вдалося завантажити вміст: " + (data.error || "невідома помилка"), "error");
+        notify("Не вдалося завантажити вміст: " + describeServerError(data), "error");
         return;
       }
       state.content = data.content;
@@ -172,32 +187,117 @@
      Локально сховища немає, і той самий файл приймає /api/upload.
      ------------------------------------------------------------------------ */
 
-  function uploadFile(file, onProgress) {
-    if (!state.persistentStorage) {
-      return fetch(API_UPLOAD + "?name=" + encodeURIComponent(file.name), {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        credentials: "same-origin",
-        body: file
-      }).then(function (response) {
-        return response.json().then(function (data) {
-          if (!response.ok || !data.ok) throw new Error(describeUploadError(data));
-          return data.url;
-        });
-      });
+  /* Фото стискається ще в браузері. Це не косметика: файл іде через функцію
+     Vercel, яка не приймає більше за 4.5 МБ у тілі запиту, а знімок із
+     телефона легко важить 6-8 МБ. Заразом сайт не вантажить 4000 px там, де
+     показує 800. */
+  var MAX_IMAGE_EDGE = 2560;
+  var JPEG_QUALITY = 0.85;
+
+  function shrinkImage(file) {
+    if (file.type === "image/webp" || !window.createImageBitmap) {
+      return Promise.resolve(file);
     }
 
-    return import("../js/vendor/blob-client.js").then(function (blob) {
-      return blob.upload("media/" + file.name, file, {
-        access: "public",
-        handleUploadUrl: API_UPLOAD,
-        contentType: file.type,
-        multipart: file.size > MULTIPART_FROM,
-        onUploadProgress: function (event) {
-          if (onProgress) onProgress(event.percentage || 0);
-        }
-      }).then(function (result) { return result.url; });
+    return window.createImageBitmap(file).then(function (bitmap) {
+      var scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
+
+      /* Дрібне фото, яке й так уміщається, не варто перекодовувати — це лише
+         втратило б якість без жодного виграшу. */
+      if (scale === 1 && file.size <= state.maxUploadBytes * 0.8) {
+        bitmap.close();
+        return file;
+      }
+
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+
+      return new Promise(function (resolve) {
+        canvas.toBlob(function (blob) {
+          if (!blob || blob.size >= file.size) {
+            resolve(file);
+            return;
+          }
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" }));
+        }, "image/jpeg", JPEG_QUALITY);
+      });
+    }).catch(function () {
+      /* Браузер не впорався з форматом — хай вирішує сервер. */
+      return file;
     });
+  }
+
+  function uploadFile(file, onProgress) {
+    var prepared = file.type.indexOf("image/") === 0
+      ? shrinkImage(file)
+      : Promise.resolve(file);
+
+    return prepared.then(function (ready) {
+      if (ready.size > state.maxUploadBytes) {
+        var limit = Math.round(state.maxUploadBytes / 1048576);
+        throw new Error(ready.type.indexOf("video/") === 0
+          ? "відео більше за " + limit + " МБ не проходить — вставте посилання в поле нижче"
+          : "файл більший за " + limit + " МБ");
+      }
+
+      if (state.directUpload) {
+        return postFile(ready, onProgress);
+      }
+
+      /* Є сховище Blob — файл іде з браузера просто туди, повз функцію. */
+      return import("../js/vendor/blob-client.js").then(function (blob) {
+        return blob.upload("media/" + ready.name, ready, {
+          access: "public",
+          handleUploadUrl: API_UPLOAD,
+          contentType: ready.type,
+          multipart: ready.size > MULTIPART_FROM,
+          onUploadProgress: function (event) {
+            if (onProgress) onProgress(event.percentage || 0);
+          }
+        }).then(function (result) { return result.url; });
+      });
+    });
+  }
+
+  /* XHR, а не fetch: він повідомляє про хід відправки, і без цього
+     завантаження виглядало б як зависла кнопка. */
+  function postFile(file, onProgress) {
+    return new Promise(function (resolve, reject) {
+      var request = new XMLHttpRequest();
+      request.open("POST", API_UPLOAD + "?name=" + encodeURIComponent(file.name));
+      request.setRequestHeader("Content-Type", file.type);
+      request.withCredentials = true;
+
+      request.upload.addEventListener("progress", function (event) {
+        if (onProgress && event.lengthComputable) {
+          onProgress((event.loaded / event.total) * 100);
+        }
+      });
+
+      request.addEventListener("load", function () {
+        var data = null;
+        try {
+          data = JSON.parse(request.responseText);
+        } catch (e) {
+          data = null;
+        }
+        if (request.status >= 200 && request.status < 300 && data && data.ok) resolve(data.url);
+        else reject(new Error(describeUploadError(data)));
+      });
+
+      request.addEventListener("error", function () { reject(new Error("немає зв'язку із сервером")); });
+
+      request.send(file);
+    });
+  }
+
+  function describeServerError(data) {
+    if (!data) return "невідома помилка";
+    if (data.detail) return data.error + " — " + data.detail;
+    return data.error || "невідома помилка";
   }
 
   function describeUploadError(data) {
@@ -685,7 +785,7 @@
     body.appendChild(mediaField({
       kind: "video",
       label: "Вибрати відео",
-      hint: "MP4, WebM або MOV, до 300 МБ. Програється просто в плитці.",
+      hint: videoHint(),
       get: function () { return review.video; },
       set: function (value) {
         review.video = value;
@@ -982,7 +1082,7 @@
       if (!data.ok) {
         notify(data.error === "no-video"
           ? "У цьому відгуку немає відео."
-          : "Не вдалося опублікувати: " + (data.error || "невідома помилка"), "error");
+          : "Не вдалося опублікувати: " + describeServerError(data), "error");
         busy(actions, false);
         return;
       }
@@ -1033,7 +1133,7 @@
         if (data.status === 401) {
           notify("Сесія завершилася. Перезавантажте сторінку й увійдіть знову.", "error");
         } else {
-          notify("Не вдалося зберегти: " + (data.error || "невідома помилка"), "error");
+          notify("Не вдалося зберегти: " + describeServerError(data), "error");
         }
         markDirty();
         return;
@@ -1204,7 +1304,7 @@
 
       api("reset").then(function (data) {
         if (!data.ok) {
-          notify("Не вдалося відновити: " + (data.error || "невідома помилка"), "error");
+          notify("Не вдалося відновити: " + describeServerError(data), "error");
           return;
         }
         state.content = data.content;

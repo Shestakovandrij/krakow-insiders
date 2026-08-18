@@ -1044,10 +1044,13 @@
   var REVIEW_ENDPOINT = "/api/review-submit";
   var REVIEW_UPLOAD_ENDPOINT = "/api/upload";
 
-  var REVIEW_LIMITS = {
-    image: 6 * 1024 * 1024,
-    video: 60 * 1024 * 1024
-  };
+  /* A phone photo is routinely 6-8 MB, and the function it travels through
+     will not take more than 4.5 MB. Shrinking it here is what makes the
+     upload work at all — and it is the same picture at the size the site
+     actually displays. */
+  var MAX_IMAGE_EDGE = 2560;
+  var JPEG_QUALITY = 0.85;
+  var MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
   function initRating(form) {
     var group = form.querySelector("#rvRating");
@@ -1085,43 +1088,75 @@
     paint(parseInt(field.value, 10) || 5);
   }
 
-  /* Files go straight to storage from here, the same way the panel sends
-     them — the response carries back the URL that travels with the review. */
-  function uploadReviewFile(file, onProgress) {
-    var isVideo = file.type.indexOf("video/") === 0;
-    var limit = isVideo ? REVIEW_LIMITS.video : REVIEW_LIMITS.image;
-    if (file.size > limit) {
-      return Promise.reject(new Error("too-large"));
+  function shrinkImage(file) {
+    if (file.type === "image/webp" || !window.createImageBitmap) {
+      return Promise.resolve(file);
     }
 
-    var name = "reviews/" + Date.now() + "-" + file.name.replace(/[^A-Za-z0-9._-]+/g, "-");
+    return window.createImageBitmap(file).then(function (bitmap) {
+      var scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
 
-    return import("./vendor/blob-client.js")
-      .then(function (blob) {
-        return blob.upload(name, file, {
-          access: "public",
-          handleUploadUrl: REVIEW_UPLOAD_ENDPOINT,
-          contentType: file.type,
-          onUploadProgress: function (event) {
-            if (onProgress) onProgress(event.percentage || 0);
+      /* A small photo that already fits is left alone — re-encoding it would
+         only cost quality. */
+      if (scale === 1 && file.size <= MAX_UPLOAD_BYTES * 0.8) {
+        bitmap.close();
+        return file;
+      }
+
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+
+      return new Promise(function (resolve) {
+        canvas.toBlob(function (blob) {
+          if (!blob || blob.size >= file.size) {
+            resolve(file);
+            return;
           }
-        }).then(function (result) { return result.url; });
-      })
-      .catch(function (err) {
-        if (err && err.message === "too-large") throw err;
-        /* No Blob store configured (a local run, mostly): the same file goes
-           through the function instead. */
-        return fetch(REVIEW_UPLOAD_ENDPOINT + "?scope=review&name=" + encodeURIComponent(file.name), {
-          method: "POST",
-          headers: { "Content-Type": file.type },
-          body: file
-        }).then(function (response) {
-          return response.json().then(function (data) {
-            if (!response.ok || !data.ok) throw new Error(data.error || "upload-failed");
-            return data.url;
-          });
-        });
+          resolve(new File([blob], "photo.jpg", { type: "image/jpeg" }));
+        }, "image/jpeg", JPEG_QUALITY);
       });
+    }).catch(function () {
+      /* The browser could not decode it — let the server decide. */
+      return file;
+    });
+  }
+
+  /* XHR rather than fetch: it reports upload progress, and without that a
+     video upload looks like a button that stopped responding. */
+  function uploadReviewFile(file, onProgress) {
+    var prepared = file.type.indexOf("image/") === 0 ? shrinkImage(file) : Promise.resolve(file);
+
+    return prepared.then(function (ready) {
+      if (ready.size > MAX_UPLOAD_BYTES) throw new Error("too-large");
+
+      return new Promise(function (resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.open("POST", REVIEW_UPLOAD_ENDPOINT +
+          "?scope=review&name=" + encodeURIComponent(ready.name || "upload"));
+        request.setRequestHeader("Content-Type", ready.type);
+
+        request.upload.addEventListener("progress", function (event) {
+          if (onProgress && event.lengthComputable) onProgress((event.loaded / event.total) * 100);
+        });
+
+        request.addEventListener("load", function () {
+          var data = null;
+          try {
+            data = JSON.parse(request.responseText);
+          } catch (e) {
+            data = null;
+          }
+          if (request.status >= 200 && request.status < 300 && data && data.ok) resolve(data.url);
+          else reject(new Error((data && data.error) || "upload-failed"));
+        });
+
+        request.addEventListener("error", function () { reject(new Error("network")); });
+        request.send(ready);
+      });
+    });
   }
 
   function validateReviewForm(form) {

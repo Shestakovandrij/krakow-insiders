@@ -31,15 +31,18 @@ function text(value, maxLength) {
     .slice(0, maxLength);
 }
 
-/* Media paths are either files that ship with the repo (images/…, media/…)
-   or absolute https URLs handed back by Blob after an upload. Anything else
-   — javascript:, data:, protocol-relative — is dropped, because these values
-   land in src attributes on the public site. */
+/* Media values are one of three shapes: a file that ships with the repo
+   (images/…, media/…), a file uploaded through the panel and served back by
+   /api/media (/m/…), or an absolute https URL — a Blob upload, or a link the
+   owner pasted. Anything else — javascript:, data:, protocol-relative — is
+   dropped, because these values land in src attributes on the public site. */
 function mediaUrl(value) {
   const raw = text(value, MAX.url);
   if (!raw) return "";
+  if (raw.indexOf("..") !== -1) return "";
   if (/^https:\/\/[^\s"'<>]+$/i.test(raw)) return raw;
-  if (/^(images|media)\/[A-Za-z0-9._\-\/]+$/.test(raw) && raw.indexOf("..") === -1) return raw;
+  if (/^\/m\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(raw)) return raw;
+  if (/^(images|media)\/[A-Za-z0-9._\-\/]+$/.test(raw)) return raw;
   return "";
 }
 

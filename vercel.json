@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/m/:file", "destination": "/api/media?p=:file" }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "panel-data": false
+    }
+  }
+}
